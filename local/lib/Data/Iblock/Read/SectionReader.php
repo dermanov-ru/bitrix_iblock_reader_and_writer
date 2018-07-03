@@ -7,10 +7,10 @@
  */
 
 
-namespace Data\Iblock\Query;
+namespace Data\Iblock\Read;
 
 
-class Section extends Engine
+class SectionReader extends Engine
 {
     
     public function fetchAll(  )

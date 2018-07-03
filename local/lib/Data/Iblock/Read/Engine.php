@@ -7,11 +7,10 @@
  */
 
 
-namespace Data\Iblock\Query;
+namespace Data\Iblock\Read;
 
 
 use Bitrix\Main\Loader;
-use Tools\Logger;
 
 abstract class Engine
 {
@@ -42,7 +41,7 @@ abstract class Engine
         $this->iblockId = $iblockId;
     }
     
-    protected static function findIblockId( $type, $code )
+    public static function findIblockId( $type, $code )
     {
         if (!$type)
             throw new \Exception ( '$type can not be void' );
@@ -64,12 +63,7 @@ abstract class Engine
         $iblockId = $iblock["ID"];
     
         if (!$iblockId) {
-            Logger::critical("cant find iblock ID", [
-                "TYPE" => $type,
-                "CODE" => $code,
-            ], "iblock/find");
-            
-            return 0;
+            throw new \Exception ( "cant find iblock [$type:$code] " );
         }
         
         return $iblockId;

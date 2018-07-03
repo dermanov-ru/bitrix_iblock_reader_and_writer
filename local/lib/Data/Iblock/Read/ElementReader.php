@@ -7,10 +7,10 @@
  */
 
 
-namespace Data\Iblock\Query;
+namespace Data\Iblock\Read;
 
 
-class Element extends Engine
+class ElementReader extends Engine
 {
     /**
      * Iblock engine version: 1.0 or 2.0
@@ -169,5 +169,35 @@ class Element extends Engine
                 $item[ $prop ] = $ob['VALUE'];
             }
         }
+    }
+    
+    public static function getElementIdByXmlId( $xmlId, $iblockId )
+    {
+        $query = new ElementReader($iblockId);
+        $query->addFilter("XML_ID", $xmlId);
+        $result = $query->fetchAll();
+        $item = current($result);
+        
+        return $item["ID"];
+    }
+    
+    public static function getElementIdByXmlIdMulti( $xmlId, $iblockId )
+    {
+        // обнуляем множ св-во с типов "привязка к элементам"
+        // если передать пустой массив - он просто игнорируется ядром
+        if (!$xmlId)
+            return false;
+        
+        $query = new ElementReader($iblockId);
+        $query->addFilter("XML_ID", $xmlId);
+        $items = $query->fetchAll();
+        
+        $result = [];
+        
+        foreach ( $items as $item ) {
+            $result[] = $item["ID"];
+        }
+        
+        return $result;
     }
 }

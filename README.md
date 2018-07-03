@@ -1,4 +1,6 @@
 # О проекте
+## ООП конструктор запросов для выборки данных из инфоблоков
+
 Данный проект представляет собой ООП конструктор запросов для выборки данных из инфоблоков: разделов и элементов. 
 
 Новым ядром D7 стало намного приятнее пользоваться для построения запросов на выборку данных из инфоблоков. Однако, ровно до тех пор, пока дело не касается выборки свойств и фильтрации по свойствам.
@@ -10,7 +12,19 @@
 Еще приходится учитывать, что выборка множественых свойств из инфоблоков 1.0 ведет к декартову произведению и дублированию данных.
 Поэтому, в этом случае, свойства нужно получать отдельно от элементов.
 
+## Обертка для записи элементов в инфоблок
+
+В тоже время я занимался импортом на одном проекте - задача заключалась в синхронизации сайтов-клонов. 
+То есть было три сайта, два из которых копии основного. 
+И была задача автоматизировать ручное наполнение контентом, чтобы можно было заполнить на одном сайте, и синхронизировать клоны.
+На всех сайтах-клонах у элементов и свойств(енумов) совпадали XML_ID.
+Как всегда, были заморочки с обнулением множественного св-ва типа "файл" :)
+Написал обертку для записи элементов в инфоблок, сохранения внешних файлов, и выборке ID по XML_ID.
+
+Это близкие по смыслу проекты, поэтому не стал их разделять на разные репозитории.
+
 # Возможности
+## ООП конструктор запросов для выборки данных из инфоблоков
 Возможности ООП конструкторва почти не отличаются от стандартных возможностей старого API для выборки данных из инфоблоков, то есть метода GetList классов \CIblockElement и \CIblockSection. 
 
 - указать поля для выборки
@@ -20,8 +34,15 @@
 - задать фильтр
 - получить все строки разом
 - выборка хранится в объекте запроса 
+- найти ИД иблока по коду
 
 По мере необходимости - можно будет прикрутить группировку.  
+
+## Обертка для записи элементов в инфоблок
+- Создание и обновление элементов инфоблока
+- сохранение внешних файлов в папку upload
+- удобное обновление множественного св-ва типа "файл"
+- пакетное получение ID по XML_ID, для елементов и енумов
 
 # Установка
 1. Положить файлы проекта в папку `/local/`
@@ -43,9 +64,11 @@ spl_autoload_register(function ($class) {
 ```
 
 # Примеры
-## Выборка элементов
+## Чтение данных
+### Выборка элементов
 ```
 <?php
+$iblockId = Engine::findIblockId($type, $code);
 $elementQueryEngine = new \Data\Iblock\Query\Element( $iblockId );
 
 // если инфоблок версии 1.0 - нужно вызвать метод явно.
@@ -70,7 +93,7 @@ $elementQueryEngine
 
 $items = $elementQueryEngine->fetchAll();
 ```
-## Выборка разделов
+### Выборка разделов
 ```
 <?php
 sectionQueryEngine = new \Data\Iblock\Query\Section( $iblockId );
@@ -90,4 +113,32 @@ sectionQueryEngine
     ->addSelectProp("UF_MORE_PHOTO"); 
 
 $sections = sectionQueryEngine->fetchAll();
+```
+## Запись данных
+### Запись элемента инфоблока
+```
+<?php
+$writer = new ElementWriter();
+$iblockId = Engine::findIblockId("CATALOG", "collections");
+$id = ElementReader::getElementIdByXmlId($item["XML_ID"], $iblockId);
+
+$updateFields = [
+    "DETAIL_TEXT" => $item["DETAIL_TEXT"],
+    "DETAIL_TEXT_TYPE" => $item["DETAIL_TEXT_TYPE"],
+    "PREVIEW_PICTURE" => $writer->saveRemoteFile($item["PREVIEW_PICTURE"], $returnArray = true),
+    "DETAIL_PICTURE" => $writer->saveRemoteFile($item["DETAIL_PICTURE"], $returnArray = true),
+];
+
+$updateProps = [
+    "COLOR" => EnumReader::getEnumIdByXmlIdMulti($item["PROPERTY_COLOR_VALUE"], $iblockId, "COLOR"),
+    "STYLISTIC" => EnumReader::getEnumIdByXmlIdMulti($item["PROPERTY_STYLISTIC_VALUE"], $iblockId, "STYLISTIC"),
+];
+
+$updateFileProps = [
+    "PHOTO" => $writer->saveRemoteFileMulti($item["PROPERTY_PHOTO_VALUE"]),
+];
+        
+// $id = $writer->addElement($updateFields, $iblockId, $updateProps, $updateFileProps);
+// or
+$writer->updateElement($id, $updateFields, $iblockId, $updateProps, $updateFileProps);
 ```
