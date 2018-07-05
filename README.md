@@ -69,50 +69,50 @@ spl_autoload_register(function ($class) {
 ```
 <?php
 $iblockId = Engine::findIblockId($type, $code);
-$elementQueryEngine = new \Data\Iblock\Query\Element( $iblockId );
+$elementReader = new \Data\Iblock\Read\ElementReader( $iblockId );
 
 // если инфоблок версии 1.0 - нужно вызвать метод явно.
-// $elementQueryEngine->setIblockEngineVersion1();
+// $elementReader->setIblockEngineVersion1();
 
 // если инфоблок версии 2.0 - можно не вызывать метод явно, это поведение по умолчанию
-// $elementQueryEngine->setIblockEngineVersion2();
+// $elementReader->setIblockEngineVersion2();
 
-$elementQueryEngine
+$elementReader
     ->addFilter("ACTIVE", "Y");
     ->addFilter("CODE", $arParams["ROUT_VALUES"]["ELEMENT_CODE"]);
 
-$elementQueryEngine
+$elementReader
     ->addSelectField("NAME");
     ->addSelectField("DETAIL_PICTURE");
     ->addSelectField("DETAIL_TEXT");
 
-$elementQueryEngine
+$elementReader
     ->addSelectProp("ARTICUL");    // single prop
     ->addSelectProp("MORE_PHOTO"); // multiple prop
     ->addSelectProp("MATERIAL");   // multiple prop
 
-$items = $elementQueryEngine->fetchAll();
+$items = $elementReader->fetchAll();
 ```
 ### Выборка разделов
 ```
 <?php
-sectionQueryEngine = new \Data\Iblock\Query\Section( $iblockId );
+$sectionReader = new \Data\Iblock\Read\SectionReader( $iblockId );
 
-sectionQueryEngine
+$sectionReader
     ->addFilter("ACTIVE", "Y");
     ->addFilter("CODE", $arParams["ROUT_VALUES"]["SECTION_CODE"]);
 
-sectionQueryEngine
+$sectionReader
     ->addSelectField("NAME");
     ->addSelectField("PICTURE");
     ->addSelectField("DESCRIPTION");
 
-sectionQueryEngine
+$sectionReader
     ->addSelectProp("UF_CUSTOM_NAME");    
     ->addSelectProp("UF_ADDITIONAL_DESC");    
     ->addSelectProp("UF_MORE_PHOTO"); 
 
-$sections = sectionQueryEngine->fetchAll();
+$sections = $sectionReader->fetchAll();
 ```
 ## Запись данных
 ### Запись элемента инфоблока
